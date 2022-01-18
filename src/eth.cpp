@@ -95,17 +95,16 @@ void handle_arp_packet(Ctx &ctx)
         printf("non ip arp packet ignored");
     }
 
-
-    print_arp_packet(htype,ptype,hlen,plen,opcode,smac,sip,dmac,dip);
+    //print_arp_packet(htype,ptype,hlen,plen,opcode,smac,sip,dmac,dip);
 
     if(opcode == ARP_REQ)
     {
-    
+/*    
         printf("replying to arp req from:\n"); 
         print_ip(sip); print_mac(smac);
         printf("reply:\n");
         print_ip(ctx.ip); print_mac(ctx.mac);
-    
+*/  
 
         build_arp_reply(ctx.packet.data(),smac,sip,ctx.mac,ctx.ip);
         //build_arp_reply(ctx.packet.data(),smac,sip,ctx.mac,dip);

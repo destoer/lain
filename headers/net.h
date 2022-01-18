@@ -27,6 +27,10 @@ static constexpr u16 ARP_REQ = 0x0001;
 static constexpr u16 ARP_REPLY = 0x0002;
 
 
+static constexpr u16 IP_HDR_SIZE = 20;
+
+static constexpr u8 DSCP_DF = 0;
+
 struct EthHdr
 {
     u8 dmac[MAC_SIZE];
@@ -53,4 +57,31 @@ inline void write_network(u8 *buf,u32 offset, T v)
 {
     v = bswap(v);
     memcpy(&buf[offset],&v,sizeof(v));
+}
+
+// TODO: generalise this for TCP/UDP
+inline u16 csum(const u8 *buf)
+{
+    u32 v = 0;
+
+    for(u32 i = 0; i < IP_HDR_SIZE; i += 2)
+    {
+        // ignore the csum allready there
+        if(i == 10)
+        {
+            continue;
+        }
+
+        v += read_host<u16>(buf,i);
+    }
+
+    if(v >= 0xffff)
+    {
+        v = u16(v);
+        v += 1;
+    }
+
+    v = ~v;
+
+    return v;
 }
