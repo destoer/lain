@@ -22,3 +22,32 @@ void print_ip(u32 ip)
 
     printf("%d.%d.%d.%d\n",buf[3],buf[2],buf[1],buf[0]);
 }
+
+// TODO: this want handle a odd len
+u16 csum(const u8 *buf, u32 len,u32 ignore)
+{
+    if(len & 1)
+    {
+        assert(false);
+    }
+
+    u16 v = 0;
+
+    for(u32 i = 0; i < len; i += 2)
+    {
+        // ignore the csum allready there
+        if(i == ignore)
+        {
+            continue;
+        }
+
+        u16 x = read_host<u16>(buf,i);
+
+        u32 carry = (u32(v) + u32(x)) > 0xffff;
+
+        v += x;
+        v += carry;
+    }
+
+    return ~v;
+}

@@ -1,16 +1,16 @@
 void print_eth_header(const EthHdr &hdr)
 {
-    puts("dst mac:");
-    print_mac(hdr.dmac);
+    puts("eth header:");
+    printf("dst mac:"); print_mac(hdr.dmac);
 
-    puts("src mac:");
-    print_mac(hdr.smac);
+    printf("src mac:"); print_mac(hdr.smac);
 
     printf("type: %04x\n",hdr.type);
 }
 
 void print_arp_packet(u16 htype, u16 ptype, u8 hlen, u8 plen, u16 opcode, const u8 *smac, u32 sip, const u8 *dmac, u32 dip)
 {
+    puts("arp header:");
     printf("htype: %04x\n",htype);
     printf("ptype: %04x\n",ptype);
     printf("hlen: %02x\n",hlen);
@@ -49,7 +49,7 @@ void build_arp_reply(u8 *buf,const u8 *dmac,u32 dip, const u8 *smac, u32 sip)
     build_eth_packet(buf,dmac,smac,PROTO_ARP);
 
     // write arp header
-    build_arp_packet(&buf[ETH_HDR_SIZE],HTYPE_ETH,PTYPE_IP,MAC_SIZE,IP_SIZE,ARP_REPLY,smac,sip,dmac,dip);
+    build_arp_packet(&buf[ETH_HDR_SIZE],HTYPE_ETH,PROTO_IP,MAC_SIZE,IP_SIZE,ARP_REPLY,smac,sip,dmac,dip);
 }
 
 void build_arp_request(u8 *buf,u32 dip, const u8 *smac,  u32 sip)
@@ -64,7 +64,7 @@ void build_arp_request(u8 *buf,u32 dip, const u8 *smac,  u32 sip)
     zero_mem(dmac,sizeof(dmac));
 
     // write arp header
-    build_arp_packet(&buf[ETH_HDR_SIZE],HTYPE_ETH,PTYPE_IP,MAC_SIZE,IP_SIZE,ARP_REQ,smac,sip,dmac,dip);
+    build_arp_packet(&buf[ETH_HDR_SIZE],HTYPE_ETH,PROTO_IP,MAC_SIZE,IP_SIZE,ARP_REQ,smac,sip,dmac,dip);
 }
 
 
@@ -90,7 +90,7 @@ void handle_arp_packet(Ctx &ctx)
     UNUSED(opcode);UNUSED(smac); UNUSED(sip); UNUSED(dmac); UNUSED(dip);
 
     // dont handle this atm
-    if(ptype != PTYPE_IP)
+    if(ptype != PROTO_IP)
     {
         printf("non ip arp packet ignored");
     }
@@ -125,6 +125,7 @@ void handle_arp_packet(Ctx &ctx)
     else
     {
         printf("arp reply!");
+        print_arp_packet(htype,ptype,hlen,plen,opcode,smac,sip,dmac,dip);
         exit(1);
     }
 }
@@ -139,28 +140,28 @@ void parse_eth_header(const u8 *buf,EthHdr &hdr)
 
 void handle_eth_header(Ctx &ctx, u32 size)
 {
-    EthHdr hdr;
-    parse_eth_header(ctx.packet.data(),hdr);
+    EthHdr eth_hdr;
+    parse_eth_header(ctx.packet.data(),eth_hdr);
 
     // okay what protocol are we dealing with
-    switch(hdr.type)
+    switch(eth_hdr.type)
     {
         case PROTO_ARP:
         {
-            //print_eth_header(hdr);
+            //print_eth_header(eth_hdr);
             handle_arp_packet(ctx);
             break;
         }
 
-        case PTYPE_IP:
+        case PROTO_IP:
         {
-            handle_ip_packet(ctx,size);
+            handle_ip_packet(ctx,eth_hdr,ctx.packet.data(),size);
             break;
         }
 
         default: 
         {
-            printf("unhandled eth req %04x\n",hdr.type);
+            printf("unhandled eth req %04x\n",eth_hdr.type);
             break;
         }
     }

@@ -22,7 +22,7 @@ static constexpr u32 MAC_SIZE = 6;
 static constexpr u32 IP_SIZE = 4;
 
 static constexpr u16 HTYPE_ETH = 0x0001;
-static constexpr u16 PTYPE_IP = 0x0800;
+static constexpr u16 PROTO_IP = 0x0800;
 static constexpr u16 ARP_REQ = 0x0001;
 static constexpr u16 ARP_REPLY = 0x0002;
 
@@ -31,12 +31,44 @@ static constexpr u16 IP_HDR_SIZE = 20;
 
 static constexpr u8 DSCP_DF = 0;
 
+static constexpr u8 IP_PROTO_ICMP = 1;
+static constexpr u32 ICMP_HDR_SIZE = 8;
+static constexpr u32 ICMP_TYPE_ECHO = 8;
+static constexpr u32 ICMP_TYPE_REPLY = 0;
+
+static constexpr u32 ICMP_OFFSET = ETH_HDR_SIZE + IP_HDR_SIZE;
+
 struct EthHdr
 {
     u8 dmac[MAC_SIZE];
     u8 smac[MAC_SIZE];
     u16 type;
 };
+
+
+struct IpHdr
+{
+    u8 version;
+    u8 ihl;
+    u8 dscp;
+    u8 ecn;
+    u16 len;
+    u16 ident;
+    u8 flags;
+    u16 fragment_offset;
+    u8 ttl;
+    u8 proto;
+    u16 checksum;
+    u32 sip;
+    u32 dip;
+};
+
+struct IpPacket
+{
+    EthHdr eth_hdr;
+    IpHdr ip_hdr;
+};
+
 
 template<typename T>
 inline T read_host(const u8 *buf, u32 offset)
@@ -57,31 +89,4 @@ inline void write_network(u8 *buf,u32 offset, T v)
 {
     v = bswap(v);
     memcpy(&buf[offset],&v,sizeof(v));
-}
-
-// TODO: generalise this for TCP/UDP
-inline u16 csum(const u8 *buf)
-{
-    u32 v = 0;
-
-    for(u32 i = 0; i < IP_HDR_SIZE; i += 2)
-    {
-        // ignore the csum allready there
-        if(i == 10)
-        {
-            continue;
-        }
-
-        v += read_host<u16>(buf,i);
-    }
-
-    if(v >= 0xffff)
-    {
-        v = u16(v);
-        v += 1;
-    }
-
-    v = ~v;
-
-    return v;
 }
