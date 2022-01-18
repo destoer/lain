@@ -58,7 +58,6 @@ void build_icmp_packet(u8 *buf,u32 ip_len,const u8 *dmac,const u8 *smac,u32 dip,
 }
 
 
-// TODO: this needs to be split into a build_icmp helper
 void handle_echo_req(Ctx &ctx,IpPacket &ip_packet,const u8* buf, u32 size)
 {
     // want to go up to the ident
@@ -102,7 +101,6 @@ void handle_icmp_packet(Ctx &ctx,IpPacket &ip_packet,const u8* buf, u32 size)
     printf("computed checksum %04x\n",checksum_actual);
 
     // invalid checksum
-    // TODO: this is busted
     if(checksum_actual != checksum)
     {
         // TODO: this needs to actually be handled 

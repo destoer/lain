@@ -69,7 +69,7 @@ struct IpPacket
     IpHdr ip_hdr;
 };
 
-
+// TODO: this wont work on BE
 template<typename T>
 inline T read_host(const u8 *buf, u32 offset)
 {

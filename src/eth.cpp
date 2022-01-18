@@ -70,9 +70,6 @@ void build_arp_request(u8 *buf,u32 dip, const u8 *smac,  u32 sip)
 
 void handle_arp_packet(Ctx &ctx)
 {
-    //puts("arp packet");
-
-
     // print out the arp packet
     const u8 *arp_req = &ctx.packet[ETH_HDR_SIZE];
 
@@ -107,12 +104,8 @@ void handle_arp_packet(Ctx &ctx)
 */  
 
         build_arp_reply(ctx.packet.data(),smac,sip,ctx.mac,ctx.ip);
-        //build_arp_reply(ctx.packet.data(),smac,sip,ctx.mac,dip);
-
-        //dump_buf(ctx.packet.data(),ETH_HDR_SIZE + ARP_HDR_SIZE);
 
         s32 size = write_packet(ctx,ETH_HDR_SIZE + ARP_HDR_SIZE);
-
 
         if(size < 0)
         {

@@ -23,7 +23,7 @@ void print_ip(u32 ip)
     printf("%d.%d.%d.%d\n",buf[3],buf[2],buf[1],buf[0]);
 }
 
-// TODO: this want handle a odd len
+// TODO: this wont handle a odd len
 u16 csum(const u8 *buf, u32 len,u32 ignore)
 {
     if(len & 1)
