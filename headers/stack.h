@@ -10,3 +10,5 @@ struct Ctx
 
 s32 read_packet(Ctx &ctx, u32 len);
 s32 write_packet(Ctx &ctx, u32 len);
+
+void handle_ip_packet(Ctx &ctx, u32 size);

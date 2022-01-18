@@ -43,7 +43,7 @@ void build_arp_packet(u8 *buf,u16 htype, u16 ptype, u8 hlen, u8 plen, u16 opcode
     write_network(buf,24,dip);
 }
 
-void build_arp_reply(u8 *buf,const u8 *dmac, u32 dip, const u8 *smac,  u32 sip)
+void build_arp_reply(u8 *buf,const u8 *dmac,u32 dip, const u8 *smac, u32 sip)
 {
     // write eth header
     build_eth_packet(buf,dmac,smac,PROTO_ARP);
@@ -51,6 +51,22 @@ void build_arp_reply(u8 *buf,const u8 *dmac, u32 dip, const u8 *smac,  u32 sip)
     // write arp header
     build_arp_packet(&buf[ETH_HDR_SIZE],HTYPE_ETH,PTYPE_IP,MAC_SIZE,IP_SIZE,ARP_REPLY,smac,sip,dmac,dip);
 }
+
+void build_arp_request(u8 *buf,u32 dip, const u8 *smac,  u32 sip)
+{
+    // ask everyone
+    u8 dmac[MAC_SIZE];
+    fill_byte(dmac,0Xff,sizeof(dmac));
+
+    // write eth header
+    build_eth_packet(buf,dmac,smac,PROTO_ARP);
+
+    zero_mem(dmac,sizeof(dmac));
+
+    // write arp header
+    build_arp_packet(&buf[ETH_HDR_SIZE],HTYPE_ETH,PTYPE_IP,MAC_SIZE,IP_SIZE,ARP_REQ,smac,sip,dmac,dip);
+}
+
 
 void handle_arp_packet(Ctx &ctx)
 {
@@ -109,7 +125,8 @@ void handle_arp_packet(Ctx &ctx)
     // this is a reply and we aint interested in these atm
     else
     {
-        
+        printf("arp reply!");
+        exit(1);
     }
 }
 
@@ -138,8 +155,7 @@ void handle_eth_header(Ctx &ctx, u32 size)
 
         case PTYPE_IP:
         {
-            puts("ip packet");
-            dump_buf(ctx.packet.data(),size);
+            handle_ip_packet(ctx,size);
             break;
         }
 

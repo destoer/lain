@@ -51,4 +51,18 @@ inline T bswap(T x)
 	return x;
 }
 
+inline void zero_mem(u8 *buf, u32 size)
+{
+    memset(buf,0,size);    
+}
+
+inline void fill_byte(u8 *buf, u8 v, u32 size)
+{
+    for(u32 i = 0; i < size; i++)
+    {
+        buf[i] = v;
+    }
+}
+
+
 #define UNUSED(x) (void)(x)
